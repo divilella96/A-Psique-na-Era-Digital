@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="pt" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Psique na Era Digital: Uma Exploração Interativa</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Warm Neutrals -->
+    <!-- Application Structure Plan: A thematic, single-page application with four main sections: "Fundamentos", "Desafios Atuais", "Fronteiras Futuras", and "Caminhos e Soluções". This non-linear structure, supported by a fixed top navigation, allows users to freely explore core concepts, current problems, future technologies, and proposed solutions. The design prioritizes user engagement through interactive components like clickable cards for core theories, a hover-able grid for future risks, an accordion for solutions, and a dynamic chart to visualize the intervention framework. This architecture was chosen to transform a dense academic report into an intuitive and exploratory learning experience, making complex information more digestible and memorable than a simple linear reading. -->
+    <!-- Visualization & Content Choices: 
+        - Suler's Factors (Table 1): Report Info -> Organize/Inform -> Interactive Cards -> On-click reveal of details -> More engaging than a static table -> Vanilla JS.
+        - Tech Risk Matrix (Table 2): Report Info -> Compare/Organize -> Interactive Grid -> Hover to show details in a tooltip/info box -> Makes dense data scannable -> Vanilla JS.
+        - Solutions Framework (Table 3): Report Info -> Organize/Inform -> Accordion Component -> Click to expand/collapse levels -> Manages information density effectively -> Vanilla JS.
+        - Key Statistics: Report Info -> Inform/Impact -> Large typography callout boxes -> Highlights crucial data points -> HTML/CSS.
+        - Intervention Levels Chart (Synthesized): Report Info -> Compare/Summarize -> Horizontal Bar Chart -> Hover for tooltips -> Provides a visual summary of the solutions framework -> Chart.js (Canvas).
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F8F7F4;
+            color: #333333;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #0077b6;
+            border-bottom-color: #0077b6;
+        }
+        .card {
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .suler-card-inner {
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        .suler-card.flipped .suler-card-inner {
+            transform: rotateY(180deg);
+        }
+        .suler-card-front, .suler-card-back {
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+        }
+        .suler-card-back {
+            transform: rotateY(180deg);
+        }
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .tech-risk-grid > div:hover .risk-tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header id="main-header" class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <div class="text-xl font-bold text-gray-800">
+                <a href="#hero">Psique Digital</a>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#fundamentos" class="nav-link pb-1">Fundamentos</a>
+                <a href="#desafios" class="nav-link pb-1">Desafios Atuais</a>
+                <a href="#futuro" class="nav-link pb-1">Fronteiras Futuras</a>
+                <a href="#solucoes" class="nav-link pb-1">Caminhos e Soluções</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-button" class="text-gray-800 focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
+                </button>
+            </div>
+        </nav>
+        <div id="mobile-menu" class="hidden md:hidden">
+            <a href="#fundamentos" class="block py-2 px-4 text-sm hover:bg-gray-200">Fundamentos</a>
+            <a href="#desafios" class="block py-2 px-4 text-sm hover:bg-gray-200">Desafios Atuais</a>
+            <a href="#futuro" class="block py-2 px-4 text-sm hover:bg-gray-200">Fronteiras Futuras</a>
+            <a href="#solucoes" class="block py-2 px-4 text-sm hover:bg-gray-200">Caminhos e Soluções</a>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="min-h-screen flex items-center bg-white">
+            <div class="container mx-auto px-6 text-center">
+                <h1 class="text-4xl md:text-6xl font-bold text-gray-800 leading-tight mb-4">A Psique na Era Digital</h1>
+                <p class="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8">Uma exploração interativa sobre a nossa relação com a tecnologia, os desafios que enfrentamos e os caminhos para um futuro digital mais humano.</p>
+                <a href="#fundamentos" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-full hover:bg-blue-700 transition duration-300">Começar a Explorar</a>
+            </div>
+        </section>
+
+        <section id="fundamentos" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-4">Fundamentos da Psique Digital</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Para compreender o impacto da tecnologia, é essencial analisar os mecanismos que governam o nosso comportamento no ambiente digital. Explore os três pilares que explicam como a nossa identidade, relações e ações se transformam online.</p>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="card bg-white p-8 rounded-lg shadow-lg text-center">
+                        <div class="text-4xl mb-4">👤</div>
+                        <h3 class="text-xl font-bold mb-2">A Reconfiguração do Self</h3>
+                        <p class="text-gray-600">O ambiente online é um palco para a construção da identidade, levando a uma versão curada de nós mesmos. Esta performance pode criar uma dissociação entre o "eu" virtual e o real, um estado que Sherry Turkle descreve como "sozinhos juntos".</p>
+                    </div>
+                    <div class="card bg-white p-8 rounded-lg shadow-lg text-center">
+                        <div class="text-4xl mb-4">🔄</div>
+                        <h3 class="text-xl font-bold mb-2">O Motor da Comparação Social</h3>
+                        <p class="text-gray-600">As redes sociais amplificam a nossa tendência natural de nos compararmos com os outros. A exposição a vidas idealizadas gera comparações ascendentes constantes, ligadas a sentimentos de inadequação, ansiedade e diminuição da autoestima.</p>
+                    </div>
+                    <div class="card bg-white p-8 rounded-lg shadow-lg text-center">
+                        <div class="text-4xl mb-4">🎭</div>
+                        <h3 class="text-xl font-bold mb-2">O Efeito da Desinibição Online</h3>
+                        <p class="text-gray-600">Online, as pessoas tendem a agir com menos restrição. Este fenómeno, conceptualizado por John Suler, explica tanto a partilha de sentimentos profundos (desinibição benigna) como a prevalência de discurso de ódio e cyberbullying (desinibição tóxica).</p>
+                    </div>
+                </div>
+
+                <div class="mt-20">
+                    <h3 class="text-2xl font-bold text-center mb-2">Os Seis Fatores da Desinibição Online</h3>
+                    <p class="text-center text-gray-600 max-w-2xl mx-auto mb-8">John Suler identificou seis fatores que explicam porque nos sentimos menos inibidos online. Clique em cada cartão para ver como se manifestam de forma positiva (benigna) e negativa (tóxica).</p>
+                    <div id="suler-factors" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="desafios" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-4">Desafios Contemporâneos</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">A interação com um ecossistema digital projetado para capturar a atenção gera desafios prementes para a saúde mental e a coesão social. Analisamos aqui os problemas mais significativos da nossa era hiperconectada.</p>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+                    <div class="card p-6 rounded-lg border border-gray-200">
+                        <div class="text-4xl mb-3">😟</div>
+                        <h3 class="font-bold text-lg">Epidemia de Saúde Mental</h3>
+                        <p class="text-sm text-gray-600">O uso intensivo de redes sociais está correlacionado com o aumento de depressão, ansiedade e dismorfia corporal, especialmente entre jovens.</p>
+                    </div>
+                    <div class="card p-6 rounded-lg border border-gray-200">
+                        <div class="text-4xl mb-3">⛓️</div>
+                        <h3 class="font-bold text-lg">Dependência e Escapismo</h3>
+                        <p class="text-sm text-gray-600">O design viciante, com reforço intermitente (dopamina), leva à compulsão e a fenómenos como a Nomofobia (medo de estar sem telemóvel).</p>
+                    </div>
+                    <div class="card p-6 rounded-lg border border-gray-200">
+                        <div class="text-4xl mb-3">🎯</div>
+                        <h3 class="font-bold text-lg">Economia da Atenção</h3>
+                        <p class="text-sm text-gray-600">O modelo de negócio assenta em maximizar o tempo de ecrã através de design persuasivo, como o scroll infinito e notificações push.</p>
+                    </div>
+                     <div class="card p-6 rounded-lg border border-gray-200">
+                        <div class="text-4xl mb-3">💔</div>
+                        <h3 class="font-bold text-lg">Paradoxo da Solidão</h3>
+                        <p class="text-sm text-gray-600">Apesar da hiperconectividade, as "conexões fracas" online não substituem as relações profundas, aumentando os níveis de isolamento social.</p>
+                    </div>
+                </div>
+
+                <div class="mt-16 bg-gray-50 p-8 rounded-lg">
+                    <h3 class="text-2xl font-bold text-center mb-6">A Arquitetura da Captura</h3>
+                    <div class="flex flex-col md:flex-row items-center justify-center gap-4 text-center">
+                        <div class="p-4 rounded-lg bg-white shadow">
+                            <p class="font-bold">Atenção do Utilizador</p>
+                            <p class="text-sm">O recurso mais valioso</p>
+                        </div>
+                        <div class="text-2xl font-mono text-blue-500">→</div>
+                        <div class="p-4 rounded-lg bg-white shadow">
+                            <p class="font-bold">Design Persuasivo</p>
+                            <p class="text-sm">(Scroll Infinito, Notificações)</p>
+                        </div>
+                        <div class="text-2xl font-mono text-blue-500">→</div>
+                        <div class="p-4 rounded-lg bg-white shadow">
+                            <p class="font-bold">Maximização do Tempo</p>
+                            <p class="text-sm">Engajamento e recolha de dados</p>
+                        </div>
+                        <div class="text-2xl font-mono text-blue-500">→</div>
+                        <div class="p-4 rounded-lg bg-white shadow">
+                            <p class="font-bold">Lucro com Publicidade</p>
+                            <p class="text-sm">O modelo de negócio</p>
+                        </div>
+                    </div>
+                    <p class="text-center mt-6 text-gray-600">Este ciclo, otimizado por algoritmos, não visa o bem-estar, mas sim o lucro. Os problemas de saúde mental são uma consequência direta e previsível deste modelo.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="futuro" class="py-20">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-4">Fronteiras Futuras</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Novas tecnologias prometem redefinir ainda mais a interação humano-máquina, introduzindo dilemas psicológicos, éticos e sociais sem precedentes. Explore os desafios da próxima fronteira digital.</p>
+                
+                <div class="bg-white rounded-lg shadow-lg p-8">
+                    <div class="mb-6 border-b">
+                        <nav id="tech-tabs" class="flex -mb-px" aria-label="Tabs">
+                        </nav>
+                    </div>
+                    <div id="tech-content">
+                    </div>
+                </div>
+
+                <div class="mt-16">
+                    <h3 class="text-2xl font-bold text-center mb-2">Matriz de Riscos Psicológicos</h3>
+                    <p class="text-center text-gray-600 max-w-2xl mx-auto mb-8">As tecnologias emergentes partilham riscos comuns, mas com manifestações distintas. Passe o rato sobre cada célula para explorar o risco específico.</p>
+                    <div id="risk-matrix" class="bg-white rounded-lg shadow-lg p-4 md:p-6">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="solucoes" class="py-20 bg-white">
+            <div class="container mx-auto px-6">
+                <h2 class="text-3xl font-bold text-center mb-4">Caminhos e Soluções</h2>
+                <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">Enfrentar estes desafios exige uma abordagem sistémica e coordenada. A solução não está num único ponto, mas numa rede de ações interdependentes que operam em múltiplos níveis da sociedade.</p>
+                
+                <div class="grid lg:grid-cols-2 gap-12 items-center">
+                    <div id="solutions-accordion">
+                    </div>
+                    <div class="chart-container w-full max-w-xl mx-auto h-80 md:h-96">
+                        <canvas id="solutionsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-8">
+        <div class="container mx-auto px-6 text-center">
+            <p>&copy; 2025 Psique Digital. Uma síntese interativa baseada no material de estudo sobre Psicologia e Tecnologia.</p>
+            <p class="text-sm text-gray-400 mt-2">Este é um projeto conceptual para fins educacionais.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link, #mobile-menu a');
+            const sections = document.querySelectorAll('section');
+            const headerHeight = document.getElementById('main-header').offsetHeight;
+
+            const activateLink = (id) => {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${id}`) {
+                        link.classList.add('active');
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        activateLink(entry.target.id);
+                    }
+                });
+            }, { rootMargin: `-${headerHeight}px 0px 0px 0px`, threshold: 0.4 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    if (mobileMenu.classList.contains('hidden') === false) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                });
+            });
+
+            const sulerFactorsData = [
+                {
+                    factor: "Anonimato Dissociativo",
+                    description: "A identidade online é percebida como separada da vida real, reduzindo a responsabilidade.",
+                    benign: "Partilha de traumas em fóruns de apoio anónimos.",
+                    toxic: "Discurso de ódio e assédio sob pseudónimos."
+                },
+                {
+                    factor: "Invisibilidade",
+                    description: "Ausência física, eliminando a linguagem corporal e as reações não-verbais.",
+                    benign: "Indivíduo com gaguez expressa-se com mais confiança por texto.",
+                    toxic: "Críticas cruéis que não seriam ditas cara a cara."
+                },
+                {
+                    factor: "Assincronia",
+                    description: "A comunicação não ocorre em tempo real, permitindo 'bater e correr'.",
+                    benign: "Tempo para formular respostas ponderadas numa conversa por e-mail.",
+                    toxic: "Enviar uma mensagem agressiva e desconectar-se para evitar a resposta."
+                },
+                {
+                    factor: "Introjeção Solipsista",
+                    description: "A persona do outro é criada na mente do leitor, fundindo-se com os seus próprios pensamentos.",
+                    benign: "Sentir uma conexão profunda e idealizada com um interlocutor online.",
+                    toxic: "Atribuir intenções maliciosas a uma mensagem ambígua."
+                },
+                {
+                    factor: "Imaginação Dissociativa",
+                    description: "O ciberespaço é percebido como um 'jogo' ou uma realidade separada.",
+                    benign: "Experimentação com diferentes identidades em jogos de RPG online.",
+                    toxic: "Justificar o cyberbullying como 'apenas uma brincadeira na internet'."
+                },
+                {
+                    factor: "Minimização da Autoridade",
+                    description: "A ausência de status e hierarquia do mundo real nivela o campo de jogo.",
+                    benign: "Estudante desafia as ideias de um professor num fórum online.",
+                    toxic: "Desrespeito por especialistas e moderadores de comunidades."
+                }
+            ];
+
+            const sulerContainer = document.getElementById('suler-factors');
+            sulerFactorsData.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'suler-card bg-transparent h-64 perspective-1000';
+                card.innerHTML = `
+                    <div class="suler-card-inner relative w-full h-full">
+                        <div class="suler-card-front absolute w-full h-full bg-white rounded-lg shadow-md p-6 flex flex-col justify-center items-center text-center cursor-pointer">
+                            <h4 class="font-bold text-lg mb-2">${item.factor}</h4>
+                            <p class="text-sm text-gray-600">${item.description}</p>
+                            <span class="mt-4 text-xs text-blue-500 font-semibold">Clique para ver mais</span>
+                        </div>
+                        <div class="suler-card-back absolute w-full h-full bg-blue-50 rounded-lg shadow-md p-6 flex flex-col justify-center text-center cursor-pointer">
+                            <div class="mb-4">
+                                <h5 class="font-bold text-green-600">Benigna</h5>
+                                <p class="text-sm text-gray-700">${item.benign}</p>
+                            </div>
+                            <div>
+                                <h5 class="font-bold text-red-600">Tóxica</h5>
+                                <p class="text-sm text-gray-700">${item.toxic}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                card.addEventListener('click', () => card.classList.toggle('flipped'));
+                sulerContainer.appendChild(card);
+            });
+
+            const techData = {
+                "Inteligência Artificial (IA)": {
+                    icon: "🤖",
+                    content: "A IA está a evoluir de ferramenta para agente ativo na sociedade. A sua ascensão levanta questões sobre autonomia humana, com a 'governamentalidade algorítmica' a tomar decisões cruciais. Relações parassociais com IAs empáticas podem atrofiar a inteligência emocional, enquanto os vieses nos dados de treino podem amplificar desigualdades sociais existentes.",
+                },
+                "Metaverso (VR/AR)": {
+                    icon: "🕶️",
+                    content: "O Metaverso promete uma rede de experiências imersivas que podem alterar a perceção da realidade e o senso de presença. A identidade mediada por avatares oferece liberdade de experimentação, mas intensifica o risco de dissociação entre o eu físico e o virtual, podendo erodir a empatia e a autoestima. A manipulação comportamental pode tornar-se perfeitamente integrada na experiência.",
+                },
+                "Interfaces Cérebro-Computador (BCIs)": {
+                    icon: "🧠",
+                    content: "As BCIs representam a fusão final, permitindo comunicação direta entre a mente e o digital. Embora com enormes potenciais terapêuticos, desafiam conceitos de livre-arbítrio, identidade e privacidade mental. A capacidade de aceder e influenciar processos mentais levanta ameaças de manipulação, levando ao debate sobre 'neurodireitos' para proteger a integridade cognitiva.",
+                }
+            };
+            
+            const techTabsContainer = document.getElementById('tech-tabs');
+            const techContentContainer = document.getElementById('tech-content');
+            let firstTab = true;
+
+            Object.keys(techData).forEach(key => {
+                const tab = document.createElement('button');
+                tab.className = `tech-tab whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm ${firstTab ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`;
+                tab.textContent = `${techData[key].icon} ${key}`;
+                tab.dataset.target = key;
+                techTabsContainer.appendChild(tab);
+
+                const content = document.createElement('div');
+                content.id = key;
+                content.className = `tech-content-pane ${firstTab ? '' : 'hidden'}`;
+                content.innerHTML = `<p class="text-gray-700">${techData[key].content}</p>`;
+                techContentContainer.appendChild(content);
+
+                firstTab = false;
+            });
+
+            document.querySelectorAll('.tech-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tech-tab').forEach(t => {
+                        t.classList.remove('border-blue-500', 'text-blue-600');
+                        t.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                    });
+                    tab.classList.add('border-blue-500', 'text-blue-600');
+                    tab.classList.remove('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                    
+                    document.querySelectorAll('.tech-content-pane').forEach(pane => {
+                        pane.classList.add('hidden');
+                    });
+                    document.getElementById(tab.dataset.target).classList.remove('hidden');
+                });
+            });
+
+            const riskMatrixData = {
+                headers: ["Risco Psicológico", "Inteligência Artificial (IA)", "Metaverso (VR/AR)", "Interfaces Cérebro-Computador (BCIs)"],
+                rows: [
+                    {
+                        risk: "Perda de Autonomia e Agência",
+                        data: [
+                            "Dependência de sistemas de decisão algorítmicos, atrofia do pensamento crítico.",
+                            "Comportamento moldado por arquiteturas de design imersivas e persuasivas.",
+                            "Submissão a comandos ou sugestões neurais, erosão do livre-arbítrio."
+                        ]
+                    },
+                    {
+                        risk: "Crise de Identidade e Dissociação",
+                        data: [
+                            "Relações parassociais com IAs substituindo as humanas, confusão emocional.",
+                            "Dissociação profunda entre o self físico e a identidade avatárica, perda de contacto com a realidade.",
+                            "Confusão sobre a origem dos pensamentos e emoções (humanos vs. máquina), fragmentação do self."
+                        ]
+                    },
+                    {
+                        risk: "Vulnerabilidade à Manipulação",
+                        data: [
+                            "Manipulação comportamental através de micro-targeting e governança algorítmica.",
+                            "Publicidade e propaganda subliminares e integradas na experiência imersiva.",
+                            "Acesso e manipulação direta de estados mentais e emocionais para fins comerciais ou políticos."
+                        ]
+                    },
+                    {
+                        risk: "Isolamento Social e Erosão da Empatia",
+                        data: [
+                            "Preferência por companheiros de IA 'perfeitos' e controláveis, desvalorizando a complexidade das relações humanas.",
+                            "Escapismo para mundos virtuais, levando à desconexão do mundo físico e das relações presenciais.",
+                            "Comunicação 'telepática' que pode atrofiar as competências de comunicação não-verbal e empática."
+                        ]
+                    }
+                ]
+            };
+
+            const riskMatrixContainer = document.getElementById('risk-matrix');
+            let matrixHTML = '<div class="tech-risk-grid grid grid-cols-4 gap-1 text-center text-xs md:text-sm">';
+            riskMatrixData.headers.forEach(header => {
+                matrixHTML += `<div class="font-bold p-2 bg-gray-100 rounded-t-lg">${header}</div>`;
+            });
+            riskMatrixData.rows.forEach(row => {
+                matrixHTML += `<div class="font-bold p-2 bg-gray-50 flex items-center justify-center">${row.risk}</div>`;
+                row.data.forEach(cellData => {
+                    matrixHTML += `
+                        <div class="relative bg-blue-50 hover:bg-blue-100 transition-colors duration-300 p-2 flex items-center justify-center cursor-pointer min-h-[80px] md:min-h-[100px]">
+                            <span>✔️</span>
+                            <div class="risk-tooltip absolute bottom-full mb-2 w-64 bg-gray-800 text-white text-xs rounded py-2 px-3 opacity-0 visibility-hidden transition-all duration-300 z-10 transform translate-y-2">
+                                ${cellData}
+                                <svg class="absolute text-gray-800 h-2 w-full left-0 top-full" x="0px" y="0px" viewBox="0 0 255 255" xml:space="preserve"><polygon class="fill-current" points="0,0 127.5,127.5 255,0"/></svg>
+                            </div>
+                        </div>`;
+                });
+            });
+            matrixHTML += '</div>';
+            riskMatrixContainer.innerHTML = matrixHTML;
+
+            const solutionsData = [
+                {
+                    level: "Individual",
+                    icon: "🧘",
+                    objective: "Aumentar a agência e a resiliência pessoal.",
+                    actions: "Praticar higiene digital (limites de tempo, desativar notificações), desenvolver autoconsciência emocional e priorizar interações offline e a solidão produtiva."
+                },
+                {
+                    level: "Tecnológico (Design)",
+                    icon: "💡",
+                    objective: "Realinhar a tecnologia com os valores humanos.",
+                    actions: "Adotar princípios de 'Ethical by Design', criar modelos de negócio não extrativos (ex: subscrição) e projetar para 'Tempo Bem Gasto' em vez de tempo de ecrã."
+                },
+                {
+                    level: "Clínico",
+                    icon: "🩺",
+                    objective: "Inovar e expandir o acesso ao tratamento.",
+                    actions: "Desenvolver e regulamentar a telepsicologia, usar Realidade Virtual para terapia de exposição (ex: fobias, TEPT) e aplicar gamificação para aumentar o engajamento."
+                },
+                {
+                    level: "Educacional",
+                    icon: "�",
+                    objective: "Capacitar a próxima geração para um uso crítico.",
+                    actions: "Implementar programas de literacia em saúde mental e digital nas escolas, ensinando sobre algoritmos, desinformação e design persuasivo."
+                },
+                {
+                    level: "Político (Regulatório)",
+                    icon: "🏛️",
+                    objective: "Criar um ecossistema digital seguro e saudável.",
+                    actions: "Regular plataformas e IA, fortalecer a proteção de dados (LGPD), estabelecer neurodireitos e promover padrões de segurança internacionais."
+                }
+            ];
+
+            const accordionContainer = document.getElementById('solutions-accordion');
+            solutionsData.forEach((item, index) => {
+                const accordionItem = document.createElement('div');
+                accordionItem.className = 'border-b border-gray-200';
+                accordionItem.innerHTML = `
+                    <button class="accordion-button w-full text-left p-4 focus:outline-none">
+                        <div class="flex items-center justify-between">
+                            <span class="text-lg font-semibold">${item.icon} ${item.level}</span>
+                            <span class="accordion-icon text-xl transition-transform duration-300 transform">+</span>
+                        </div>
+                    </button>
+                    <div class="accordion-content bg-gray-50 px-4">
+                        <div class="py-4">
+                            <p class="font-bold text-gray-700">${item.objective}</p>
+                            <p class="mt-2 text-gray-600">${item.actions}</p>
+                        </div>
+                    </div>
+                `;
+                accordionContainer.appendChild(accordionItem);
+            });
+
+            document.querySelectorAll('.accordion-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const content = button.nextElementSibling;
+                    const icon = button.querySelector('.accordion-icon');
+                    
+                    if (content.style.maxHeight) {
+                        content.style.maxHeight = null;
+                        icon.style.transform = 'rotate(0deg)';
+                    } else {
+                        document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = null);
+                        document.querySelectorAll('.accordion-icon').forEach(i => i.style.transform = 'rotate(0deg)');
+                        content.style.maxHeight = content.scrollHeight + "px";
+                        icon.style.transform = 'rotate(45deg)';
+                    }
+                });
+            });
+
+            const ctx = document.getElementById('solutionsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: solutionsData.map(s => s.level),
+                    datasets: [{
+                        label: 'Escala de Intervenção',
+                        data: [2, 3, 3, 4, 5],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.6)',
+                            'rgba(255, 206, 86, 0.6)',
+                            'rgba(54, 162, 235, 0.6)',
+                            'rgba(153, 102, 255, 0.6)',
+                            'rgba(255, 99, 132, 0.6)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 206, 86, 1)',
+                            'rgba(54, 162, 235, 1)',
+                            'rgba(153, 102, 255, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        title: {
+                            display: true,
+                            text: 'Níveis de Solução e Escala de Impacto Sistémico'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.x !== null) {
+                                        label += solutionsData[context.dataIndex].objective;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Impacto Sistémico (Conceptual)'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+�
